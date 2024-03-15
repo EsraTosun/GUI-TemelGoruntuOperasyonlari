@@ -7,6 +7,9 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Global değişken olarak file_path tanımlanıyor
+file_path = None
+
 class Odev1Page(QWidget):
     def __init__(self):
         super().__init__()
@@ -39,6 +42,7 @@ class Odev1Page(QWidget):
 
 
     def load_image(self):
+        global file_path  # global değişkene erişim sağlanıyor
         # Resim seçme işlemi için dosya iletişim kutusunu aç
         file_dialog = QFileDialog(self)
         file_dialog.setNameFilter("Resim dosyaları (*.jpg *.png)")
@@ -103,20 +107,31 @@ class Odev2Page(QWidget):
 
     def create_inner_tabs(self):
         # İç sekme 1 oluştur
-        inner_tab1 = QWidget()
-        layout1 = QVBoxLayout(inner_tab1)
-        label1 = QLabel("İç Sekme 1")
-        layout1.addWidget(label1)
+        inner_tab1 = InnerTab1()
 
         # İç sekme 2 oluştur
-        inner_tab2 = QWidget()
-        layout2 = QVBoxLayout(inner_tab2)
-        label2 = QLabel("İç Sekme 2")
-        layout2.addWidget(label2)
+        inner_tab2 = InnerTab2()
 
         # İç sekme widget'ını içindeki sekme widget'ına ekle
         self.inner_tab_widget.addTab(inner_tab1, "Sekme 1")
         self.inner_tab_widget.addTab(inner_tab2, "Sekme 2")
+
+class InnerTab1(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        layout = QVBoxLayout(self)
+        label1 = QLabel("İç Sekme 1")
+        layout.addWidget(label1)
+
+
+class InnerTab2(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        layout = QVBoxLayout(self)
+        label2 = QLabel("İç Sekme 2")
+        layout.addWidget(label2)
 
 
 class ImageProcessingWindow(QWidget):
