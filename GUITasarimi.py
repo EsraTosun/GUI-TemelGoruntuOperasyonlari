@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QTabWidget,QAction, QFileDialog
 from PyQt5.QtGui import  QColor
 
-
 import cv2
+# Ödev 1 de histogram almak için kullanıldı. İkinci ödevde kullanılmamıştır.
+
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QLineEdit, QMessageBox
 from math import cos, sin, radians
