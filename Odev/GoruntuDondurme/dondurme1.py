@@ -22,7 +22,6 @@ class ImageRotateApp(QMainWindow):
         self.label.setAlignment(Qt.AlignCenter)
 
         # Label'ı şeffaf yap
-        self.label.setStyleSheet("background-color: transparent;")
 
         self.image_path = "C:/Users/esrat/Dersler/BaharDonemi/DijitalGoruntuIsleme/Hafta3/Odev2/image/1.jpg"  # Örnek olarak bir resim dosyası
         self.load_image()
