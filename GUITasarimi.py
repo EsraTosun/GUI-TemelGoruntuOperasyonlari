@@ -28,6 +28,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBo
 from PyQt5.QtGui import QPixmap, QImage, QTransform
 from PyQt5.QtCore import Qt
 
+import numpy as np
+from PIL import Image
+
 # Global değişken olarak file_path tanımlanıyor
 file_path = None
 
@@ -176,7 +179,6 @@ class ResimBuyutme(QWidget):
 
     def resmi_buyut_ve_goster(self):
         global file_path
-        print(file_path)
         try:
             oran = float(self.giris.text())
             if 0 < oran < 1:
@@ -198,39 +200,70 @@ class ResimBuyutme(QWidget):
         plt.show()  # plt ile ekranı göster
 
     def resmi_buyut(self ,yol, oran):
-        # Resmi aç
-        resim = Image.open(yol)
-        orijinal_genislik, orijinal_yukseklik = resim.size
+        # Resmin boyutlarını al
+        image = Image.open(yol)
+        print("1")
+
+        # Giriş resminin boyutları
+        width, height = image.size
+        print(width)
+        print(height)
+
 
         # Yeni boyutları hesapla
-        yeni_genislik = int(orijinal_genislik * oran)
-        yeni_yukseklik = int(orijinal_yukseklik * oran)
+        new_height = int(height * oran)
+        new_width = int(width * oran)
+        print("2")
 
-        # Yeni boyutta bir boş resim oluştur
-        yeni_resim = Image.new("RGB", (yeni_genislik, yeni_yukseklik))
+        # Yeni boyutlarda bir ızgara oluştur
+        new_y = np.arange(new_height).reshape(-1, 1).repeat(new_width, axis=1)
+        new_x = np.arange(new_width).reshape(1, -1).repeat(new_height, axis=0)
+        print("3")
 
-        # Yeni resmin piksellerini oluştur
-        for y in range(yeni_yukseklik):
-            for x in range(yeni_genislik):
-                # Orjinal resimdeki pikselin koordinatlarını hesapla
-                orijinal_x = int(x / oran)
-                orijinal_y = int(y / oran)
+        # Eski boyutlarda piksel koordinatlarını hesapla
+        old_y = new_y / oran
+        old_x = new_x / oran
+        print("4")
 
-                # Orjinal resimdeki pikselin rengini al
-                renk = resim.getpixel((orijinal_x, orijinal_y))
+        # Hesaplanan koordinatları birleştir
+        points = np.stack([old_y, old_x], axis=-1)
+        print("5")
 
-                # Yeni resimde pikselin rengini ayarla
-                yeni_resim.putpixel((x, y), renk)
+        # Resmi NumPy dizisine dönüştür
+        image_array = np.array(image)
 
-        # Resmi yeniden boyutlandır
-        #yeni_resim = resim.resize((yeni_genislik, yeni_yukseklik), Image.Resampling.LANCZOS)
+        # Sıfırlar dizisi oluştur
+        interpolated_image = np.zeros((new_height, new_width, image_array.shape[2]), dtype=np.uint8)
 
-        # PIL resmini QPixmap'e dönüştür
-        yeni_resim.save("temp.jpg")
-        pixmap = QPixmap("temp.jpg")
+        # Yeni boyutlardaki her piksel için interpolasyon yap
+        for i in range(new_height):
+            for j in range(new_width):
+                # Hesaplanan koordinatlar için dört komşu pikselin indekslerini hesapla
+                y1, x1 = int(old_y[i, j]), int(old_x[i, j])
+                y2, x2 = min(y1 + 1, height - 1), min(x1 + 1, width - 1)
 
-        return yeni_resim
+                # Dört komşu pikselin değerlerini al
+                q11, q12 = image_array[y1, x1], image_array[y1, x2]
+                q21, q22 = image_array[y2, x1], image_array[y2, x2]
 
+                # Bilinear interpolasyon formülü
+                interpolated_value = (q11 * (x2 - old_x[i, j]) * (y2 - old_y[i, j]) +
+                                      q21 * (old_x[i, j] - x1) * (y2 - old_y[i, j]) +
+                                      q12 * (x2 - old_x[i, j]) * (old_y[i, j] - y1) +
+                                      q22 * (old_x[i, j] - x1) * (old_y[i, j] - y1))
+
+                # Hesaplanan interpolasyon değerini atama
+                interpolated_image[i, j, :] = interpolated_value
+
+        # Değerleri 0-255 aralığına kısıtlama
+        interpolated_image = np.clip(interpolated_image, 0, 255).astype(np.uint8)
+        print("6")
+        # Interpolasyon sonucunu PIL görüntüsüne dönüştür
+        interpolated_image_pil = Image.fromarray(interpolated_image)
+
+        # Kaydet
+        interpolated_image_pil.save("temp.jpg")
+        return interpolated_image
 
     def resmi_goster(self, yol):
         pixmap = QPixmap(yol)
@@ -295,38 +328,69 @@ class ResimKucultme(QWidget):
         plt.show()  # plt ile ekranı göster
 
     def resmi_kucult(self, yol, oran):
-        # Resmi aç
-        resim = Image.open(yol)
-        orijinal_genislik, orijinal_yukseklik = resim.size
+        # Resmin boyutlarını al
+        image = Image.open(yol)
+        print("1")
+
+        # Giriş resminin boyutları
+        width, height = image.size
+        print(width)
+        print(height)
 
         # Yeni boyutları hesapla
-        yeni_genislik = int(orijinal_genislik * oran)
-        yeni_yukseklik = int(orijinal_yukseklik * oran)
+        new_height = int(height * oran)
+        new_width = int(width * oran)
+        print("2")
 
-        # Yeni boyutta bir boş resim oluştur
-        yeni_resim = Image.new("RGB", (yeni_genislik, yeni_yukseklik))
+        # Yeni boyutlarda bir ızgara oluştur
+        new_y = np.arange(new_height).reshape(-1, 1).repeat(new_width, axis=1)
+        new_x = np.arange(new_width).reshape(1, -1).repeat(new_height, axis=0)
+        print("3")
 
-        # Yeni resmin piksellerini oluştur
-        for y in range(yeni_yukseklik):
-            for x in range(yeni_genislik):
-                # Orjinal resimdeki pikselin koordinatlarını hesapla
-                orijinal_x = int(x / oran)
-                orijinal_y = int(y / oran)
+        # Eski boyutlarda piksel koordinatlarını hesapla
+        old_y = new_y / oran
+        old_x = new_x / oran
+        print("4")
 
-                # Orjinal resimdeki pikselin rengini al
-                renk = resim.getpixel((orijinal_x, orijinal_y))
+        # Hesaplanan koordinatları birleştir
+        points = np.stack([old_y, old_x], axis=-1)
+        print("5")
 
-                # Yeni resimde pikselin rengini ayarla
-                yeni_resim.putpixel((x, y), renk)
+        # Resmi NumPy dizisine dönüştür
+        image_array = np.array(image)
 
-        # Resmi yeniden boyutlandır
-        # yeni_resim = resim.resize((yeni_genislik, yeni_yukseklik), Image.Resampling.LANCZOS)
+        # Sıfırlar dizisi oluştur
+        interpolated_image = np.zeros((new_height, new_width, image_array.shape[2]), dtype=np.uint8)
 
-        # PIL resmini QPixmap'e dönüştür
-        yeni_resim.save("temp.jpg")
-        pixmap = QPixmap("temp.jpg")
+        # Yeni boyutlardaki her piksel için interpolasyon yap
+        for i in range(new_height):
+            for j in range(new_width):
+                # Hesaplanan koordinatlar için dört komşu pikselin indekslerini hesapla
+                y1, x1 = int(old_y[i, j]), int(old_x[i, j])
+                y2, x2 = min(y1 + 1, height - 1), min(x1 + 1, width - 1)
 
-        return yeni_resim
+                # Dört komşu pikselin değerlerini al
+                q11, q12 = image_array[y1, x1], image_array[y1, x2]
+                q21, q22 = image_array[y2, x1], image_array[y2, x2]
+
+                # Bilinear interpolasyon formülü
+                interpolated_value = (q11 * (x2 - old_x[i, j]) * (y2 - old_y[i, j]) +
+                                      q21 * (old_x[i, j] - x1) * (y2 - old_y[i, j]) +
+                                      q12 * (x2 - old_x[i, j]) * (old_y[i, j] - y1) +
+                                      q22 * (old_x[i, j] - x1) * (old_y[i, j] - y1))
+
+                # Hesaplanan interpolasyon değerini atama
+                interpolated_image[i, j, :] = interpolated_value
+
+        # Değerleri 0-255 aralığına kısıtlama
+        interpolated_image = np.clip(interpolated_image, 0, 255).astype(np.uint8)
+        print("6")
+        # Interpolasyon sonucunu PIL görüntüsüne dönüştür
+        interpolated_image_pil = Image.fromarray(interpolated_image)
+
+        # Kaydet
+        interpolated_image_pil.save("temp.jpg")
+        return interpolated_image
 
     def resmi_goster(self, yol):
         pixmap = QPixmap(yol)
