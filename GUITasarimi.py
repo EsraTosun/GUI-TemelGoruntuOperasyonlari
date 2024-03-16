@@ -121,13 +121,11 @@ class Odev2Page(QWidget):
 
         # İç sekme widget'ını içindeki sekme widget'ına ekle
         self.inner_tab_widget.addTab(inner_tab1, "Görüntü Boyutu Büyütme")
-        self.inner_tab_widget.addTab(inner_tab2, "Sekme 2")
+        self.inner_tab_widget.addTab(inner_tab2, "Görüntü Boyutu Küçültme")
 
 class InnerTab1(QWidget):
     def __init__(self):
         super().__init__()
-
-
         yolu = "C:/Users/esrat/Dersler/BaharDonemi/DijitalGoruntuIsleme/Hafta4/Odev/Odev/image/1.jpg"
         # pencere = ResimBuyutme(yolu, oran)
         pencere = ResimBuyutme(self,yolu)
@@ -154,6 +152,8 @@ class ResimBuyutme(QWidget):
         self.setLayout(layout)
 
     def resmi_buyut_ve_goster(self):
+        global file_path
+        print(file_path)
         try:
             oran = float(self.giris.text())
             if 0 < oran < 1:
@@ -168,10 +168,11 @@ class ResimBuyutme(QWidget):
             return
 
         # Resmi büyüt
-        yeni_resim = self.resmi_buyut(self.yol, yeniOran)
+        yeni_resim = self.resmi_buyut(file_path, yeniOran)
 
         # Yeni resmi göster
-        self.resmi_goster(yeni_resim)
+        plt.imshow(yeni_resim)  # Yeni resmi plt ile göster
+        plt.show()  # plt ile ekranı göster
 
     def resmi_buyut(self ,yol, oran):
         # Resmi aç
@@ -199,9 +200,14 @@ class ResimBuyutme(QWidget):
                 yeni_resim.putpixel((x, y), renk)
 
         # Resmi yeniden boyutlandır
-        yeni_resim.save("temp.jpg")
+        #yeni_resim = resim.resize((yeni_genislik, yeni_yukseklik), Image.Resampling.LANCZOS)
 
-        return "temp.jpg"
+        # PIL resmini QPixmap'e dönüştür
+        yeni_resim.save("temp.jpg")
+        pixmap = QPixmap("temp.jpg")
+
+        return yeni_resim
+
 
     def resmi_goster(self, yol):
         pixmap = QPixmap(yol)
@@ -221,10 +227,100 @@ class ResimBuyutme(QWidget):
 class InnerTab2(QWidget):
     def __init__(self):
         super().__init__()
+        global file_path
+        yolu = "C:/Users/esrat/Dersler/BaharDonemi/DijitalGoruntuIsleme/Hafta4/Odev/Odev/image/1.jpg"
+        print(file_path)
+        pencere = ResimKucultme(self, yolu)
 
-        layout = QVBoxLayout(self)
-        label2 = QLabel("İç Sekme 2")
-        layout.addWidget(label2)
+class ResimKucultme(QWidget):
+    def __init__(self, parent, yol):
+        super().__init__(parent)
+        self.setWindowTitle('Resim Kucultme')
+
+        self.yol = yol
+
+        # Kullanıcı arayüzü bileşenlerini oluştur
+        self.etiket = QLabel("Ne kadar küçültmek istersiniz:")
+        self.giris = QLineEdit()
+        self.buton = QPushButton("Küçült")
+        self.buton.clicked.connect(self.resmi_kucult_ve_goster)
+
+        # Arayüzü düzenle
+        layout = QVBoxLayout()
+        layout.addWidget(self.etiket)
+        layout.addWidget(self.giris)
+        layout.addWidget(self.buton)
+        self.setLayout(layout)
+
+    def resmi_kucult_ve_goster(self):
+        global file_path
+        print(file_path)
+        try:
+            oran = float(self.giris.text())
+            yeniOran = 1 / oran
+            if oran <= 0:
+                QMessageBox.warning(self, "Hata", "Oran pozitif bir sayı olmalıdır.")
+                return
+        except ValueError:
+            QMessageBox.warning(self, "Hata", "Geçersiz oran.")
+            return
+
+        # Resmi büyüt
+        yeni_resim = self.resmi_kucult(file_path, yeniOran)
+
+        # Yeni resmi göster
+        plt.imshow(yeni_resim)  # Yeni resmi plt ile göster
+        plt.show()  # plt ile ekranı göster
+
+    def resmi_kucult(self, yol, oran):
+        # Resmi aç
+        resim = Image.open(yol)
+        orijinal_genislik, orijinal_yukseklik = resim.size
+
+        # Yeni boyutları hesapla
+        yeni_genislik = int(orijinal_genislik * oran)
+        yeni_yukseklik = int(orijinal_yukseklik * oran)
+
+        # Yeni boyutta bir boş resim oluştur
+        yeni_resim = Image.new("RGB", (yeni_genislik, yeni_yukseklik))
+
+        # Yeni resmin piksellerini oluştur
+        for y in range(yeni_yukseklik):
+            for x in range(yeni_genislik):
+                # Orjinal resimdeki pikselin koordinatlarını hesapla
+                orijinal_x = int(x / oran)
+                orijinal_y = int(y / oran)
+
+                # Orjinal resimdeki pikselin rengini al
+                renk = resim.getpixel((orijinal_x, orijinal_y))
+
+                # Yeni resimde pikselin rengini ayarla
+                yeni_resim.putpixel((x, y), renk)
+
+        # Resmi yeniden boyutlandır
+        # yeni_resim = resim.resize((yeni_genislik, yeni_yukseklik), Image.Resampling.LANCZOS)
+
+        # PIL resmini QPixmap'e dönüştür
+        yeni_resim.save("temp.jpg")
+        pixmap = QPixmap("temp.jpg")
+
+        return yeni_resim
+
+    def resmi_goster(self, yol):
+        pixmap = QPixmap(yol)
+        etiket = QLabel()
+        etiket.setPixmap(pixmap)
+
+        # Mevcut layoutu temizle
+        self.layout().deleteLater()
+
+        # Yeni bir QVBoxLayout oluştur
+        yeni_layout = QVBoxLayout()
+        yeni_layout.addWidget(etiket)
+
+        # Widget'in layoutunu güncelle
+        self.setLayout(yeni_layout)
+
 
 
 class ImageProcessingWindow(QWidget):

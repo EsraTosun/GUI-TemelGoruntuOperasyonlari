@@ -86,7 +86,7 @@ class ResimBuyutme(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    yolu = "C:/Users/esrat/Dersler/BaharDonemi/DijitalGoruntuIsleme/Hafta3/Odev2/image/1.jpg"
+    yolu = "C:/Users/esrat/Dersler/BaharDonemi/DijitalGoruntuIsleme/Hafta4/Odev2/image/1.jpg"
     oran = 2  # Resmi orijinal boyutunun %50'sine küçült
     # pencere = ResimBuyutme(yolu, oran)
     pencere = ResimBuyutme(yolu)
