@@ -1,31 +1,15 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow,QTabWidget,QAction, QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog,QMessageBox
-from PyQt5.QtGui import QImage, QPixmap, QColor
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QTabWidget,QAction, QFileDialog
+from PyQt5.QtGui import  QColor
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QWidget, QSpacerItem, QSizePolicy
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
 
 import cv2
 import matplotlib.pyplot as plt
-import numpy as np
-
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
-
-import sys
-from PIL import Image
-from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget, QLineEdit, QPushButton, QMessageBox
-
-import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QWidget
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtWidgets import QLineEdit, QMessageBox
 from math import cos, sin, radians
 
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QWidget, QInputDialog
-from PyQt5.QtGui import QPixmap, QImage, QTransform
+from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt
 
 import numpy as np
