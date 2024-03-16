@@ -447,7 +447,8 @@ class ZoomApp(QWidget):
         self.setLayout(layout)
 
     def load_image(self):
-        pixmap = QPixmap(self.image_path)
+        global file_path
+        pixmap = QPixmap(file_path)
 
         label_width = min(pixmap.width(), self.width())
         label_height = min(pixmap.height(), self.height())
@@ -455,13 +456,17 @@ class ZoomApp(QWidget):
         self.label.setPixmap(pixmap.scaled(label_width, label_height, Qt.KeepAspectRatio))
 
     def zoom_in(self):
-        pixmap = QPixmap(self.image_path)
+        self.load_image()
+        global file_path
+        pixmap = QPixmap(file_path)
         self.newWidth = int(self.newWidth * 1.1)  # İstediğiniz oranda büyütme faktörü (örneğin, 1.2)
         self.newHeight = int(self.newHeight * 1.1)
         self.label.setPixmap(self.scale_image(pixmap, self.newWidth, self.newHeight))
 
     def zoom_out(self):
-        pixmap = QPixmap(self.image_path)
+        self.load_image()
+        global file_path
+        pixmap = QPixmap(file_path)
         self.newWidth = int(self.newWidth * 0.9)  # İstediğiniz oranda küçültme faktörü (örneğin, 1.2)
         self.newHeight = int(self.newHeight * 0.9)
         self.label.setPixmap(self.scale_image(pixmap, self.newWidth, self.newHeight))
@@ -481,7 +486,6 @@ class InnerTab4(QWidget):
     def __init__(self):
         super().__init__()
         global file_path
-        yolu = "C:/Users/esrat/Dersler/BaharDonemi/DijitalGoruntuIsleme/Hafta4/Odev/Odev/image/1.jpg"
         print(file_path)
         pencere = ImageRotateApp(self)
 
@@ -496,7 +500,6 @@ class ImageRotateApp(QWidget):
         self.label.setAlignment(Qt.AlignCenter)
         self.label.setFixedSize(500, 500)  # Etiketin boyutunu 1000x1000 piksel olarak ayarla
 
-        self.image_path = "C:/Users/esrat/Dersler/BaharDonemi/DijitalGoruntuIsleme/Hafta4/Odev2/image/1.jpg"  # Örnek olarak bir resim dosyası
         self.load_image()
 
         self.rotate_button = QPushButton("Döndür")
@@ -509,12 +512,14 @@ class ImageRotateApp(QWidget):
 
 
     def load_image(self):
-        pixmap = QPixmap(self.image_path)
+        global file_path
+        pixmap = QPixmap(file_path)
         self.label.setPixmap(pixmap)
         self.label.setPixmap(pixmap.scaledToWidth(600))  # Pixmap'i genişliği 400 piksele ölçekle
         self.label.adjustSize()
 
     def rotate_image(self):
+        self.load_image()
         angle, ok = QInputDialog.getInt(self, "Açı Girin", "Döndürme açısını girin:", 0, -360, 360)
         if ok:
             rotated_pixmap = self.rotate_pixmap(self.label.pixmap(), angle)
